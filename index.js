@@ -3,6 +3,8 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 require('dotenv').config()
 const { MongoClient } = require('mongodb');
+const { ObjectId } = require('bson');
+
 
 const app = express();
 app.use(bodyParser.json())
@@ -21,8 +23,10 @@ client.connect(err => {
     app.post('/addStudent', (req, res) => {
         try {
             const StudentData = req.body;
+            // console.log(StudentData);
             StudentCollection.insertOne(StudentData)
                 .then(result => {
+
                     res.send(result)
                 })
         }
@@ -31,9 +35,21 @@ client.connect(err => {
         }
     })
 
+    // app.get('/AllStudents', (req, res) => {
+    //     try {
+    //         StudentCollection.find({})
+    //             .toArray((err, studentDetails) => {
+    //                 res.send(studentDetails)
+    //             })
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    // })
+
     app.get('/students', (req, res) => {
         try {
-            StudentCollection.find({})
+            const search = req.query.search
+            StudentCollection.find({ name: { $regex: search } })
                 .toArray((err, studentDetails) => {
                     res.send(studentDetails)
                 })
@@ -41,11 +57,23 @@ client.connect(err => {
             console.log(error);
         }
     })
+
+    app.delete('/deleteStudent/:id', (req, res) => {
+        const id = ObjectId(req.params.id)
+        StudentCollection.deleteOne({ _id: id })
+            .then(result => {
+                res.send(result)
+            })
+    })
+
+    app.post('/updateStudent/:id', (req, res) => {
+        const { name, registration, ID, imageUrl } = req.body;
+        const id = ObjectId(req.params.id)
+        console.log(id);
+        StudentCollection.updateOne({ _id: id }, { $set: { name: name, registration: registration, ID: ID, imageUrl: imageUrl } })
+            .then(result => res.send(result.modifiedCount > 0));
+    })
 });
-
-
-
-
 
 
 
