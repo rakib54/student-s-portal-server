@@ -23,10 +23,8 @@ client.connect(err => {
     app.post('/addStudent', (req, res) => {
         try {
             const StudentData = req.body;
-            // console.log(StudentData);
             StudentCollection.insertOne(StudentData)
                 .then(result => {
-
                     res.send(result)
                 })
         }
@@ -35,16 +33,17 @@ client.connect(err => {
         }
     })
 
-    // app.get('/AllStudents', (req, res) => {
-    //     try {
-    //         StudentCollection.find({})
-    //             .toArray((err, studentDetails) => {
-    //                 res.send(studentDetails)
-    //             })
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // })
+    app.get('/students/:id', (req, res) => {
+        try {
+            const id = ObjectId(req.params.id)
+            StudentCollection.find({ _id: id })
+                .toArray((err, studentDetails) => {
+                    res.send(studentDetails)
+                })
+        } catch (error) {
+            console.log(error);
+        }
+    })
 
     app.get('/students', (req, res) => {
         try {
